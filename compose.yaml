@@ -1,0 +1,11 @@
+services:
+  postgres:
+    container_name: gobank 
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=gobank
+    ports:
+      - "5433:5432"
+    restart: always
