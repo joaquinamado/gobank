@@ -6,27 +6,9 @@ import (
 	"log"
 
 	. "github.com/joaquinamado/gobank/internal/app/api"
-	. "github.com/joaquinamado/gobank/internal/app/storage"
-	. "github.com/joaquinamado/gobank/internal/app/types"
+	"github.com/joaquinamado/gobank/internal/app/env"
+	"github.com/joaquinamado/gobank/internal/app/repositories"
 )
-
-func seedAccount(store Storage, fname, lname, pw string) *Account {
-	acc, err := NewAccount(fname, lname, pw)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if err := store.CreateAccount(acc); err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("new account created => ", acc.Number)
-
-	return acc
-}
-
-func seedAccounts(store Storage) {
-	seedAccount(store, "John", "Doe", "password")
-}
 
 //	@title			GoBank API
 //	@version		1.0
@@ -50,23 +32,21 @@ func main() {
 	seed := flag.Bool("seed", false, "Seed the database")
 	flag.Parse()
 
-	store, err := NewPostgresStore()
+	repo, err := repositories.NewRepository()
 
 	if err != nil {
-		log.Fatal(err)
-	}
-
-	if err := store.Init(); err != nil {
 		log.Fatal(err)
 	}
 
 	if *seed {
 		fmt.Println("Seeding database")
 		// Seed stuff
-		seedAccounts(store)
+		repo.Account.SeedAccounts()
 	}
 
-	server := NewApiServer(":3000", store)
+	port := env.GetString("API_PORT", "8080")
+
+	server := NewApiServer(port, *repo)
 	mux := server.Mount()
 	server.Run(mux)
 }

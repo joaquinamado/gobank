@@ -24,7 +24,7 @@ func (s *APIServer) handleAccount(w http.ResponseWriter, r *http.Request) error 
 // @Success		200
 // @Router			/account [get]
 func (s *APIServer) handleGetAccount(w http.ResponseWriter, r *http.Request) error {
-	accounts, err := s.store.GetAccounts()
+	accounts, err := s.repo.Account.GetAccounts()
 
 	if err != nil {
 		return err
@@ -52,7 +52,7 @@ func (s *APIServer) handleGetAccountById(w http.ResponseWriter, r *http.Request)
 			return err
 		}
 
-		account, err := s.store.GetAccountByID(id)
+		account, err := s.repo.Account.GetAccountByID(id)
 
 		if err != nil {
 			return err
@@ -79,13 +79,9 @@ func (s *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) 
 		return err
 	}
 
-	account, err := types.NewAccount(req.FirstName, req.LastName, req.Password)
+	account, err := s.repo.Account.CreateAccount(req.FirstName, req.LastName, req.Password)
 
 	if err != nil {
-		return err
-	}
-
-	if err := s.store.CreateAccount(account); err != nil {
 		return err
 	}
 
@@ -104,7 +100,7 @@ func (s *APIServer) handleDeleteAccount(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		return err
 	}
-	if err := s.store.DeleteAccount(id); err != nil {
+	if err := s.repo.Account.DeleteAccount(id); err != nil {
 		return err
 	}
 

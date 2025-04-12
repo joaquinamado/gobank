@@ -11,8 +11,8 @@ import (
 // @Summary		Login
 // @Description	Login to the API
 // @Tags			auth
-// @Accept          json
-// @Param			data body	types.LoginRequest  true	"Login data"
+// @Accept			json
+// @Param			data	body	types.LoginRequest	true	"Login data"
 // @Success		200
 // @Router			/login [post]
 func (s *APIServer) handleLogin(w http.ResponseWriter, r *http.Request) error {
@@ -31,7 +31,7 @@ func (s *APIServer) handleLogin(w http.ResponseWriter, r *http.Request) error {
 
 	fmt.Println("LOGIN REQUEST: ", req)
 
-	acc, err := s.store.GetAccountByNumber(int(req.Number))
+	acc, err := s.repo.Account.GetAccountByNumber(int(req.Number))
 
 	if err != nil {
 		return err

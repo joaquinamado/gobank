@@ -1,11 +1,33 @@
 services:
-  postgres:
-    container_name: gobank 
-    image: postgres:latest
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=gobank
+  app:
+    build: .
     ports:
-      - "5433:5432"
+      - "8080:8080"
+    volumes:
+      - .:/app
+      - air_tmp:/app/tmp
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=gobank
+
+  db:
+    image: postgres:latest
     restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: gobank
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:
+  air_tmp:
+
