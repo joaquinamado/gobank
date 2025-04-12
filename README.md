@@ -1,7 +1,7 @@
 # GOBANK 
 
 This project was made following Anthony GG 
-(tutorials)[https://www.youtube.com/watch?v=pwZuNmAzaH8] as a starting 
+[tutorials](https://www.youtube.com/watch?v=pwZuNmAzaH8) as a starting 
 point. 
 
 After finishing that I continued working on the project adding different 
