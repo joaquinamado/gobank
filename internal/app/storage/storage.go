@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/joaquinamado/gobank/internal/app/env"
 	. "github.com/joaquinamado/gobank/internal/app/types"
 	_ "github.com/lib/pq"
 )
@@ -22,7 +23,13 @@ type PostgresStore struct {
 }
 
 func NewPostgresStore() (*PostgresStore, error) {
-	connStr := "user=postgres dbname=gobank password=postgres host=localhost port=5433 sslmode=disable"
+	dbName := env.GetString("DB_NAME", "gobank")
+	dbUser := env.GetString("DB_USER", "postgres")
+	dbPassword := env.GetString("DB_PASSWORD", "postgres")
+	dbHost := env.GetString("DB_HOST", "localhost")
+	dbPort := env.GetString("DB_PORT", "5433")
+	connStr := fmt.Sprintf("user=%s dbname=%s password=%s host=%s port=%s sslmode=disable", dbUser, dbName, dbPassword, dbHost, dbPort)
+
 	db, err := sql.Open("postgres", connStr)
 
 	if err != nil {

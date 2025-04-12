@@ -8,7 +8,6 @@ import (
 	. "github.com/joaquinamado/gobank/internal/app/api"
 	. "github.com/joaquinamado/gobank/internal/app/storage"
 	. "github.com/joaquinamado/gobank/internal/app/types"
-	. "github.com/joaquinamado/gobank/internal/app/utils"
 )
 
 func seedAccount(store Storage, fname, lname, pw string) *Account {
@@ -29,6 +28,24 @@ func seedAccounts(store Storage) {
 	seedAccount(store, "John", "Doe", "password")
 }
 
+//	@title			GoBank API
+//	@version		1.0
+//	@description	An API for a simple bank
+//	@termsOfService	None
+
+//	@contact.name	API Support
+//	@contact.url	None
+//	@contact.email	None
+
+//	@license.name	Apache 2.0
+//	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
+
+//	@host		localhost:3000
+//	@BasePath	/v1
+
+// @securityDefinitions.apikey	BearerAuth
+// @in							header
+// @name						Authorization
 func main() {
 	seed := flag.Bool("seed", false, "Seed the database")
 	flag.Parse()
@@ -38,9 +55,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// Creates the singleton instance of the .env file
-	GetEnvInstance()
 
 	if err := store.Init(); err != nil {
 		log.Fatal(err)
@@ -53,5 +67,6 @@ func main() {
 	}
 
 	server := NewApiServer(":3000", store)
-	server.Run()
+	mux := server.Mount()
+	server.Run(mux)
 }

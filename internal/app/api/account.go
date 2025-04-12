@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	. "github.com/joaquinamado/gobank/internal/app/types"
+	types "github.com/joaquinamado/gobank/internal/app/types"
 )
 
 func (s *APIServer) handleAccount(w http.ResponseWriter, r *http.Request) error {
@@ -18,6 +18,11 @@ func (s *APIServer) handleAccount(w http.ResponseWriter, r *http.Request) error 
 	return fmt.Errorf("Method not allowed: %s", r.Method)
 }
 
+// @Summary		Account
+// @Description	Get all accounts
+// @Tags			account
+// @Success		200
+// @Router			/account [get]
 func (s *APIServer) handleGetAccount(w http.ResponseWriter, r *http.Request) error {
 	accounts, err := s.store.GetAccounts()
 
@@ -28,6 +33,13 @@ func (s *APIServer) handleGetAccount(w http.ResponseWriter, r *http.Request) err
 	return WriteJson(w, http.StatusOK, accounts)
 }
 
+// @Summary		Account
+// @Description	Get account by ID
+// @Tags			account
+// @Param			id				path	int		true	"Account ID"
+// @Param			Authorization	header	string	true	"Insert your access token"	default(Bearer <Add access token here>)
+// @Success		200
+// @Router			/account/{id} [get]
 func (s *APIServer) handleGetAccountById(w http.ResponseWriter, r *http.Request) error {
 
 	if r.Method == "DELETE" {
@@ -50,13 +62,24 @@ func (s *APIServer) handleGetAccountById(w http.ResponseWriter, r *http.Request)
 	}
 }
 
+// @Summary		Account
+// @Description	Create an account
+// @Tags			account
+// @Param			Data body	types.CreateAccountRequest true	"Create Account Data"
+// @Success		200
+// @Router			/account [post]
 func (s *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) error {
-	req := new(CreateAccountRequest)
+	req := new(types.CreateAccountRequest)
 
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
 		return err
 	}
-	account, err := NewAccount(req.FirstName, req.LastName, req.Password)
+
+	if err := Validate.Struct(req); err != nil {
+		return err
+	}
+
+	account, err := types.NewAccount(req.FirstName, req.LastName, req.Password)
 
 	if err != nil {
 		return err
@@ -69,6 +92,12 @@ func (s *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) 
 	return WriteJson(w, http.StatusOK, account)
 }
 
+// @Summary		Account
+// @Description	Delete an account
+// @Tags			account
+// @Param			id	path	int	true	"Account ID"
+// @Success		200
+// @Router			/account/{id} [delete]
 func (s *APIServer) handleDeleteAccount(w http.ResponseWriter, r *http.Request) error {
 	id, err := getId(r)
 

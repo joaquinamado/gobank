@@ -28,9 +28,9 @@ type Account struct {
 }
 
 type CreateAccountRequest struct {
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	Password  string `json:"password"`
+	FirstName string `json:"first_name" validate:"required,min=3,max=100"`
+	LastName  string `json:"last_name" validate:"required,min=3,max=100"`
+	Password  string `json:"password" validate:"required,min=8"`
 }
 
 func NewAccount(firstName, lastName, password string) (*Account, error) {
@@ -52,6 +52,6 @@ func (a *Account) ValidatePassword(password string) error {
 }
 
 type TransferRequest struct {
-	ToAccount int     `json:"to_account"`
-	Amount    float32 `json:"amount"`
+	ToAccount int     `json:"to_account" validate:"required"`
+	Amount    float32 `json:"amount" validate:"required"`
 }

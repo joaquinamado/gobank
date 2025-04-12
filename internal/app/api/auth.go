@@ -5,17 +5,31 @@ import (
 	"fmt"
 	"net/http"
 
-	. "github.com/joaquinamado/gobank/internal/app/types"
+	types "github.com/joaquinamado/gobank/internal/app/types"
 )
 
+// @Summary		Login
+// @Description	Login to the API
+// @Tags			auth
+// @Accept          json
+// @Param			data body	types.LoginRequest  true	"Login data"
+// @Success		200
+// @Router			/login [post]
 func (s *APIServer) handleLogin(w http.ResponseWriter, r *http.Request) error {
 	if r.Method != "POST" {
 		return fmt.Errorf("Method not allowed: %s", r.Method)
 	}
-	var req LoginRequest
+
+	var req types.LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		return err
 	}
+
+	if err := Validate.Struct(req); err != nil {
+		return err
+	}
+
+	fmt.Println("LOGIN REQUEST: ", req)
 
 	acc, err := s.store.GetAccountByNumber(int(req.Number))
 
@@ -28,13 +42,9 @@ func (s *APIServer) handleLogin(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	resp := LoginResponse{
+	resp := types.LoginResponse{
 		Token:  token,
 		Number: acc.Number,
-	}
-
-	if err != nil {
-		return err
 	}
 
 	if acc.ValidatePassword(req.Password) != nil {
