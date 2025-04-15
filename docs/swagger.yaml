@@ -127,6 +127,8 @@ paths:
       responses:
         "200":
           description: OK
+      security:
+      - BearerAuth: []
       summary: Account
       tags:
       - account

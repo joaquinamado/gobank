@@ -86,6 +86,11 @@ const docTemplate = `{
         },
         "/account/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get account by ID",
                 "tags": [
                     "account"

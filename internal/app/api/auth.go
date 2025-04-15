@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	jwt "github.com/golang-jwt/jwt/v5"
 	types "github.com/joaquinamado/gobank/internal/app/types"
 )
 
@@ -29,8 +30,6 @@ func (s *APIServer) handleLogin(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	fmt.Println("LOGIN REQUEST: ", req)
-
 	acc, err := s.repo.Account.GetAccountByNumber(int(req.Number))
 
 	if err != nil {
@@ -52,4 +51,15 @@ func (s *APIServer) handleLogin(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	return WriteJson(w, http.StatusOK, resp)
+}
+
+func createJWT(account *types.Account) (string, error) {
+
+	claims := &jwt.MapClaims{
+		"expiresAt":     15000,
+		"accountNumber": account.Number,
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(jwtSecret))
 }

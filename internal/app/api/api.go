@@ -4,18 +4,15 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	jwt "github.com/golang-jwt/jwt/v5"
-	"github.com/gorilla/mux"
 	"github.com/joaquinamado/gobank/docs"
 	env "github.com/joaquinamado/gobank/internal/app/env"
 	"github.com/joaquinamado/gobank/internal/app/repositories"
-	types "github.com/joaquinamado/gobank/internal/app/types"
 	"github.com/swaggo/http-swagger"
 )
 
@@ -111,16 +108,6 @@ func makeHttpHandleFunc(f apiFunc) http.HandlerFunc {
 	}
 }
 
-func getId(r *http.Request) (int, error) {
-	idStr := mux.Vars(r)["id"]
-
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		return id, fmt.Errorf("invalid id %s", idStr)
-	}
-	return id, nil
-}
-
 func withJWTAuth(handlerFunc http.HandlerFunc, s repositories.Repositories) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tokenString := r.Header.Get("Authorization")
@@ -128,28 +115,34 @@ func withJWTAuth(handlerFunc http.HandlerFunc, s repositories.Repositories) http
 		token, error := validateJWT(tokenString)
 
 		if error != nil || !token.Valid {
+			fmt.Printf("Err 1 %v\n", error)
 			permmisionDenied(w)
 			return
 		}
+		/*
+			idStr, err := getId(r)
+			if err != nil {
+				fmt.Printf("Err 2 %v\n", err)
+				permmisionDenied(w)
+				return
+			}
 
-		idStr, err := getId(r)
-		if err != nil {
-			permmisionDenied(w)
-			return
-		}
+			account, err := s.Account.GetAccountByID(idStr)
+			if err != nil {
+				fmt.Printf("Err %v\n", err)
+				permmisionDenied(w)
+				return
+			}
 
-		account, err := s.Account.GetAccountByID(idStr)
-		if err != nil {
-			permmisionDenied(w)
-			return
-		}
+			claims := token.Claims.(jwt.MapClaims)
 
-		claims := token.Claims.(jwt.MapClaims)
-
-		if account.Number != int64(claims["accountNumber"].(float64)) {
-			permmisionDenied(w)
-			return
-		}
+			if account.Number != int64(claims["accountNumber"].(float64)) {
+				fmt.Printf("Claims: %v\n", claims)
+				fmt.Printf("Acc Num: %v\n", account.Number)
+				permmisionDenied(w)
+				return
+			}
+		*/
 		handlerFunc(w, r)
 	}
 }
@@ -167,15 +160,4 @@ func validateJWT(tokenString string) (*jwt.Token, error) {
 
 		return []byte(jwtSecret), nil
 	})
-}
-
-func createJWT(account *types.Account) (string, error) {
-
-	claims := &jwt.MapClaims{
-		"expiresAt":     15000,
-		"accountNumber": account.Number,
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(jwtSecret))
 }
