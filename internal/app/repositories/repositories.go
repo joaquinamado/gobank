@@ -23,12 +23,17 @@ func NewRepository() (*Repositories, error) {
 		log.Fatal(err)
 	}
 
+	accountRepo := &accountRepo{
+		store: *store,
+	}
+
+	transferRepo := &transferRepo{
+		store: *store,
+		acc:   accountRepo,
+	}
+
 	return &Repositories{
-		Account: &accountRepo{
-			store: *store,
-		},
-		Transfer: &transferRepo{
-			store: *store,
-		},
+		Account:  accountRepo,
+		Transfer: transferRepo,
 	}, nil
 }

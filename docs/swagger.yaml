@@ -35,6 +35,19 @@ definitions:
     - amount
     - to_account
     type: object
+  types.UpdateAccountRequest:
+    properties:
+      balance:
+        type: integer
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+    required:
+    - id
+    type: object
 host: localhost:3000
 info:
   contact:
@@ -73,6 +86,21 @@ paths:
       summary: Account
       tags:
       - account
+    put:
+      description: Update an account
+      parameters:
+      - description: Update Account Data
+        in: body
+        name: Data
+        required: true
+        schema:
+          $ref: '#/definitions/types.UpdateAccountRequest'
+      responses:
+        "200":
+          description: OK
+      summary: Account
+      tags:
+      - account
   /account/{id}:
     delete:
       description: Delete an account
@@ -96,12 +124,6 @@ paths:
         name: id
         required: true
         type: integer
-      - default: Bearer <Add access token here>
-        description: Insert your access token
-        in: header
-        name: Authorization
-        required: true
-        type: string
       responses:
         "200":
           description: OK

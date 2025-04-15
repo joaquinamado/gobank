@@ -17,7 +17,7 @@ type account interface {
 	CreateAccount(firstName, lastName, password string) (*types.Account, error)
 	SeedAccounts()
 	DeleteAccount(int) error
-	UpdateAccount(*types.Account) error
+	UpdateAccount(*types.UpdateAccountRequest) (*types.Account, error)
 	GetAccounts() ([]*types.Account, error)
 	GetAccountByID(int) (*types.Account, error)
 	GetAccountByNumber(int) (*types.Account, error)
@@ -39,6 +39,7 @@ func (r *accountRepo) CreateAccount(firstName, lastName, password string) (*type
 		EncryptedPassword: string(encp),
 		Number:            int64(rand.Intn(1000000)),
 		CreatedAt:         time.Now().UTC(),
+		UpdatedAt:         time.Now().UTC(),
 	}
 
 	if err := r.store.Account.CreateAccount(account); err != nil {
@@ -56,7 +57,7 @@ func (r *accountRepo) DeleteAccount(id int) error {
 	return nil
 }
 
-func (r *accountRepo) UpdateAccount(account *types.Account) error {
+func (r *accountRepo) UpdateAccount(account *types.UpdateAccountRequest) (*types.Account, error) {
 	return r.store.Account.UpdateAccount(account)
 }
 

@@ -37,7 +37,6 @@ func (s *APIServer) handleGetAccount(w http.ResponseWriter, r *http.Request) err
 // @Description	Get account by ID
 // @Tags			account
 // @Param			id				path	int		true	"Account ID"
-// @Param			Authorization	header	string	true	"Insert your access token"	default(Bearer <Add access token here>)
 // @Success		200
 // @Router			/account/{id} [get]
 func (s *APIServer) handleGetAccountById(w http.ResponseWriter, r *http.Request) error {
@@ -80,6 +79,32 @@ func (s *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) 
 	}
 
 	account, err := s.repo.Account.CreateAccount(req.FirstName, req.LastName, req.Password)
+
+	if err != nil {
+		return err
+	}
+
+	return WriteJson(w, http.StatusOK, account)
+}
+
+// @Summary		Account
+// @Description	Update an account
+// @Tags			account
+// @Param			Data body	types.UpdateAccountRequest true	"Update Account Data"
+// @Success		200
+// @Router			/account [put]
+func (s *APIServer) handleUpdateAccount(w http.ResponseWriter, r *http.Request) error {
+	req := new(types.UpdateAccountRequest)
+
+	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+		return err
+	}
+
+	if err := Validate.Struct(req); err != nil {
+		return err
+	}
+
+	account, err := s.repo.Account.UpdateAccount(req)
 
 	if err != nil {
 		return err

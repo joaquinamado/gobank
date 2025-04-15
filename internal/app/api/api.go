@@ -72,6 +72,7 @@ func (s *APIServer) Mount() http.Handler {
 				r.Get("/", withJWTAuth(makeHttpHandleFunc(s.handleGetAccountById), s.repo))
 				r.Delete("/", withJWTAuth(makeHttpHandleFunc(s.handleDeleteAccount), s.repo))
 			})
+			r.Put("/", makeHttpHandleFunc(s.handleUpdateAccount))
 		})
 
 		// === Transfer ===

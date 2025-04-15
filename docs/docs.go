@@ -37,6 +37,29 @@ const docTemplate = `{
                     }
                 }
             },
+            "put": {
+                "description": "Update an account",
+                "tags": [
+                    "account"
+                ],
+                "summary": "Account",
+                "parameters": [
+                    {
+                        "description": "Update Account Data",
+                        "name": "Data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.UpdateAccountRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
             "post": {
                 "description": "Create an account",
                 "tags": [
@@ -74,14 +97,6 @@ const docTemplate = `{
                         "description": "Account ID",
                         "name": "id",
                         "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "default": "Bearer \u003cAdd access token here\u003e",
-                        "description": "Insert your access token",
-                        "name": "Authorization",
-                        "in": "header",
                         "required": true
                     }
                 ],
@@ -237,6 +252,26 @@ const docTemplate = `{
                 },
                 "to_account": {
                     "type": "integer"
+                }
+            }
+        },
+        "types.UpdateAccountRequest": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "balance": {
+                    "type": "integer"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "last_name": {
+                    "type": "string"
                 }
             }
         }

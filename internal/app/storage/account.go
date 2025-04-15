@@ -3,6 +3,7 @@ package storage
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/joaquinamado/gobank/internal/app/types"
 )
@@ -11,7 +12,7 @@ type account interface {
 	createAccountTable() error
 	CreateAccount(*types.Account) error
 	DeleteAccount(int) error
-	UpdateAccount(*types.Account) error
+	UpdateAccount(*types.UpdateAccountRequest) (*types.Account, error)
 	GetAccounts() ([]*types.Account, error)
 	GetAccountByID(int) (*types.Account, error)
 	GetAccountByNumber(int) (*types.Account, error)
@@ -29,7 +30,8 @@ func (s *postgresAccount) createAccountTable() error {
               number serial,
               encrypted_password varchar(255),
               balance serial,
-              created_at timestamp
+              created_at timestamp,
+              updated_at timestamp
             )`
 
 	_, err := s.db.Exec(query)
@@ -38,9 +40,9 @@ func (s *postgresAccount) createAccountTable() error {
 
 func (s *postgresAccount) CreateAccount(acc *types.Account) error {
 	query := ` insert into account (
-      first_name, last_name, encrypted_password, number, balance, created_at
+      first_name, last_name, encrypted_password, number, balance, created_at, updated_at
     )
-    values ($1, $2, $3, $4, $5, $6)`
+    values ($1, $2, $3, $4, $5, $6, $7)`
 
 	resp, err := s.db.Query(query,
 		acc.FirstName,
@@ -48,7 +50,8 @@ func (s *postgresAccount) CreateAccount(acc *types.Account) error {
 		acc.EncryptedPassword,
 		acc.Number,
 		acc.Balance,
-		acc.CreatedAt)
+		acc.CreatedAt,
+		acc.UpdatedAt)
 
 	if err != nil {
 		return err
@@ -63,8 +66,31 @@ func (s *postgresAccount) DeleteAccount(id int) error {
 	return err
 }
 
-func (s *postgresAccount) UpdateAccount(a *types.Account) error {
-	return nil
+func (s *postgresAccount) UpdateAccount(acc *types.UpdateAccountRequest) (*types.Account, error) {
+	query := `
+	 update account set first_name = $1, last_name = $2,
+	 balance = $3, updated_at = $4
+	 where id = $5`
+
+	resp, err := s.db.Query(query,
+		acc.FirstName,
+		acc.LastName,
+		acc.Balance,
+		time.Now().UTC(),
+		acc.ID,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	account, err := scanIntoAccount(resp)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return account, nil
 }
 
 func (s *postgresAccount) GetAccounts() ([]*types.Account, error) {
@@ -123,6 +149,7 @@ func scanIntoAccount(rows *sql.Rows) (*types.Account, error) {
 		&account.EncryptedPassword,
 		&account.Balance,
 		&account.CreatedAt,
+		&account.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err

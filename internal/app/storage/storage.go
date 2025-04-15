@@ -9,7 +9,8 @@ import (
 )
 
 type Storage struct {
-	Account account
+	Account  account
+	Transfer transfer
 }
 
 func NewPostgresStore() (*Storage, error) {
@@ -27,6 +28,7 @@ func NewPostgresStore() (*Storage, error) {
 	}
 
 	if err := db.Ping(); err != nil {
+		fmt.Printf("Err: %s\n", err)
 		return nil, err
 	}
 
@@ -34,10 +36,17 @@ func NewPostgresStore() (*Storage, error) {
 		Account: &postgresAccount{
 			db: db,
 		},
+		Transfer: &postgresTransfer{
+			db: db,
+		},
 	}, nil
 }
 
 func (s *Storage) Init() error {
 	err := s.Account.createAccountTable()
+	if err != nil {
+		return err
+	}
+	err = s.Transfer.createTransferTable()
 	return err
 }
