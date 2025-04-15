@@ -4,9 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
-
-	"github.com/go-chi/chi/v5"
 
 	types "github.com/joaquinamado/gobank/internal/app/types"
 )
@@ -134,14 +131,4 @@ func (s *APIServer) handleDeleteAccount(w http.ResponseWriter, r *http.Request) 
 	}
 
 	return WriteJson(w, http.StatusOK, map[string]int{"deleted": id})
-}
-
-func getId(r *http.Request) (int, error) {
-	idStr := chi.URLParam(r, "id")
-
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		return id, fmt.Errorf("invalid id %s", idStr)
-	}
-	return id, nil
 }

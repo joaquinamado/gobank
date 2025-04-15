@@ -17,9 +17,13 @@ type transferRepo struct {
 	acc   account
 }
 
-func (t *transferRepo) CreateTransfer(transferReq *types.TransferRequest, senderId int) (*types.Transfer, error) {
+func (t *transferRepo) CreateTransfer(transferReq *types.TransferRequest, senderNumber int) (*types.Transfer, error) {
 
-	sender, err := t.acc.GetAccountByID(senderId)
+	if senderNumber == transferReq.ToAccount {
+		return nil, fmt.Errorf("Cannot send transers to same account number")
+	}
+
+	sender, err := t.acc.GetAccountByNumber(senderNumber)
 	if err != nil {
 		return nil, err
 	}
@@ -27,13 +31,14 @@ func (t *transferRepo) CreateTransfer(transferReq *types.TransferRequest, sender
 	if sender.Balance-int64(transferReq.Amount) < 0 {
 		return nil, fmt.Errorf("Invalid operation check balance")
 	}
+
 	receiver, err := t.acc.GetAccountByNumber(transferReq.ToAccount)
 	if err != nil {
 		return nil, err
 	}
 
 	transfer := &types.Transfer{
-		SenderId:   senderId,
+		SenderId:   sender.ID,
 		ReceiverId: receiver.ID,
 		Amount:     int64(transferReq.Amount),
 		CreatedAt:  time.Now().UTC(),

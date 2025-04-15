@@ -2,6 +2,7 @@ package storage
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/joaquinamado/gobank/internal/app/types"
 )
@@ -31,24 +32,44 @@ func (s *postgresTransfer) createTransferTable() error {
 }
 
 func (s *postgresTransfer) CreateTransfer(trans *types.Transfer) error {
-	query := `BEGIN;
-	insert into transfer (
-      sender_id, receiver_id, amount, created_at
-    )
-    values ($1, $2, $3, $4);
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if p := recover(); p != nil {
+			tx.Rollback()
+			panic(p)
+		} else if err != nil {
+			tx.Rollback()
+		} else {
+			err = tx.Commit()
+		}
+	}()
 
-	update account SET balance = balance - $3
-	where number = $1
+	_, err = tx.Exec(`
+		INSERT INTO transfer (
+			sender_id, receiver_id, amount, created_at
+		) VALUES ($1, $2, $3, $4)
+	`, trans.SenderId, trans.ReceiverId, trans.Amount, trans.CreatedAt)
+	if err != nil {
+		return err
+	}
 
-	update account SET balance = balance + $3
-	where number = $2
-	COMMIT;
-	`
-	_, err := s.db.Exec(query,
-		trans.SenderId,
-		trans.ReceiverId,
-		trans.Amount,
-		trans.CreatedAt)
+	_, err = tx.Exec(`
+		UPDATE account SET balance = balance - $1 WHERE id = $2
+	`, trans.Amount, trans.SenderId)
+	if err != nil {
+		return err
+	}
+	fmt.Println("LLEGA 3")
 
-	return err
+	_, err = tx.Exec(`
+		UPDATE account SET balance = balance + $1 WHERE id = $2
+	`, trans.Amount, trans.ReceiverId)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

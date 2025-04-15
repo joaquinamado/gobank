@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"strconv"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	jwt "github.com/golang-jwt/jwt/v5"
@@ -21,6 +23,7 @@ var jwtSecret = env.GetString("JW_TOKEN", "")
 type APIServer struct {
 	listenAddr string
 	repo       repositories.Repositories
+	accNumber  int64
 }
 
 type apiFunc func(http.ResponseWriter, *http.Request) error
@@ -66,15 +69,15 @@ func (s *APIServer) Mount() http.Handler {
 			r.Get("/", makeHttpHandleFunc(s.handleGetAccount))
 			r.Post("/", makeHttpHandleFunc(s.handleCreateAccount))
 			r.Route("/{id}", func(r chi.Router) {
-				r.Get("/", withJWTAuth(makeHttpHandleFunc(s.handleGetAccountById), s.repo))
-				r.Delete("/", withJWTAuth(makeHttpHandleFunc(s.handleDeleteAccount), s.repo))
+				r.Get("/", s.withJWTAuth(makeHttpHandleFunc(s.handleGetAccountById)))
+				r.Delete("/", s.withJWTAuth(makeHttpHandleFunc(s.handleDeleteAccount)))
 			})
 			r.Put("/", makeHttpHandleFunc(s.handleUpdateAccount))
 		})
 
 		// === Transfer ===
 		r.Route("/transfer", func(r chi.Router) {
-			r.Post("/", withJWTAuth(makeHttpHandleFunc(s.handleTransfer), s.repo))
+			r.Post("/", s.withJWTAuth(makeHttpHandleFunc(s.handleTransfer)))
 		})
 	})
 
@@ -108,7 +111,7 @@ func makeHttpHandleFunc(f apiFunc) http.HandlerFunc {
 	}
 }
 
-func withJWTAuth(handlerFunc http.HandlerFunc, s repositories.Repositories) http.HandlerFunc {
+func (s *APIServer) withJWTAuth(handlerFunc http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tokenString := r.Header.Get("Authorization")
 		tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
@@ -119,6 +122,9 @@ func withJWTAuth(handlerFunc http.HandlerFunc, s repositories.Repositories) http
 			permmisionDenied(w)
 			return
 		}
+		claims := token.Claims.(jwt.MapClaims)
+		s.accNumber = int64(claims["accountNumber"].(float64))
+
 		/*
 			idStr, err := getId(r)
 			if err != nil {
@@ -134,7 +140,6 @@ func withJWTAuth(handlerFunc http.HandlerFunc, s repositories.Repositories) http
 				return
 			}
 
-			claims := token.Claims.(jwt.MapClaims)
 
 			if account.Number != int64(claims["accountNumber"].(float64)) {
 				fmt.Printf("Claims: %v\n", claims)
@@ -160,4 +165,14 @@ func validateJWT(tokenString string) (*jwt.Token, error) {
 
 		return []byte(jwtSecret), nil
 	})
+}
+
+func getId(r *http.Request) (int, error) {
+	idStr := chi.URLParam(r, "id")
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		return id, fmt.Errorf("invalid id %s", idStr)
+	}
+	return id, nil
 }
