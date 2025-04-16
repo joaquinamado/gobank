@@ -22,6 +22,11 @@ features:
 
 **Pending:**
 
-- Create the transfer logic
+- Create the transfer logic (POST: DONE, GET: PENDING) 
+- For the transfer GET, create pagination
 - Add an invoice generation endpoint 
-- Create accounts by uploading a CSV 
+- Create accounts by uploading a CSV (make it as parallel as possible)  
+
+- WebSocket for account balance? Real time ?
+- Message queue for transfer (like notifications) ? 
+- Frontend (HTMX?)
