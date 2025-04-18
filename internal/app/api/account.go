@@ -36,7 +36,7 @@ func (s *APIServer) handleGetAccount(w http.ResponseWriter, r *http.Request) err
 // @Summary		Account
 // @Description	Get account by ID
 // @Tags			account
-// @Param			id				path	int		true	"Account ID"
+// @Param			id	path	int	true	"Account ID"
 // @Security		BearerAuth
 // @Success		200
 // @Router			/account/{id} [get]
@@ -46,7 +46,7 @@ func (s *APIServer) handleGetAccountById(w http.ResponseWriter, r *http.Request)
 		return s.handleDeleteAccount(w, r)
 	} else {
 
-		id, err := getId(r)
+		id, err := getPathIntParam(r, "id")
 
 		if err != nil {
 			return err
@@ -65,7 +65,7 @@ func (s *APIServer) handleGetAccountById(w http.ResponseWriter, r *http.Request)
 // @Summary		Account
 // @Description	Create an account
 // @Tags			account
-// @Param			Data body	types.CreateAccountRequest true	"Create Account Data"
+// @Param			Data	body	types.CreateAccountRequest	true	"Create Account Data"
 // @Success		200
 // @Router			/account [post]
 func (s *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) error {
@@ -91,7 +91,7 @@ func (s *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) 
 // @Summary		Account
 // @Description	Update an account
 // @Tags			account
-// @Param			Data body	types.UpdateAccountRequest true	"Update Account Data"
+// @Param			Data	body	types.UpdateAccountRequest	true	"Update Account Data"
 // @Success		200
 // @Router			/account [put]
 func (s *APIServer) handleUpdateAccount(w http.ResponseWriter, r *http.Request) error {
@@ -121,7 +121,7 @@ func (s *APIServer) handleUpdateAccount(w http.ResponseWriter, r *http.Request) 
 // @Success		200
 // @Router			/account/{id} [delete]
 func (s *APIServer) handleDeleteAccount(w http.ResponseWriter, r *http.Request) error {
-	id, err := getId(r)
+	id, err := getPathIntParam(r, "id")
 
 	if err != nil {
 		return err

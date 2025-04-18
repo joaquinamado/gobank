@@ -179,6 +179,33 @@ paths:
       summary: Transfer
       tags:
       - transfer
+  /transfer/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Transfer money between accounts
+      parameters:
+      - description: Account ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: size
+        type: integer
+      responses:
+        "200":
+          description: OK
+      security:
+      - BearerAuth: []
+      summary: Transfer
+      tags:
+      - transfer
 securityDefinitions:
   BearerAuth:
     in: header

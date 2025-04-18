@@ -70,14 +70,17 @@ func (s *APIServer) Mount() http.Handler {
 			r.Post("/", makeHttpHandleFunc(s.handleCreateAccount))
 			r.Route("/{id}", func(r chi.Router) {
 				r.Get("/", s.withJWTAuth(makeHttpHandleFunc(s.handleGetAccountById)))
-				r.Delete("/", s.withJWTAuth(makeHttpHandleFunc(s.handleDeleteAccount)))
+				r.Delete("/", s.withJWTAuth(s.acceptLoggedUserOnly(makeHttpHandleFunc(s.handleDeleteAccount))))
 			})
-			r.Put("/", makeHttpHandleFunc(s.handleUpdateAccount))
+			r.Put("/", s.withJWTAuth(s.acceptLoggedUserOnly(makeHttpHandleFunc(s.handleUpdateAccount))))
 		})
 
 		// === Transfer ===
 		r.Route("/transfer", func(r chi.Router) {
 			r.Post("/", s.withJWTAuth(makeHttpHandleFunc(s.handleTransfer)))
+			r.Route("/{id}", func(r chi.Router) {
+				r.Get("/", s.withJWTAuth(s.acceptLoggedUserOnly(makeHttpHandleFunc(s.handleGetTransferById))))
+			})
 		})
 	})
 
@@ -111,6 +114,29 @@ func makeHttpHandleFunc(f apiFunc) http.HandlerFunc {
 	}
 }
 
+func (s *APIServer) acceptLoggedUserOnly(handlerFunc http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		idStr, err := getPathIntParam(r, "id")
+		if err != nil {
+			permmisionDenied(w)
+			return
+		}
+
+		account, err := s.repo.Account.GetAccountByID(idStr)
+		if err != nil {
+			permmisionDenied(w)
+			return
+		}
+
+		if account.Number != s.accNumber {
+			permmisionDenied(w)
+			return
+		}
+		handlerFunc(w, r)
+	}
+}
+
 func (s *APIServer) withJWTAuth(handlerFunc http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tokenString := r.Header.Get("Authorization")
@@ -118,36 +144,12 @@ func (s *APIServer) withJWTAuth(handlerFunc http.HandlerFunc) http.HandlerFunc {
 		token, error := validateJWT(tokenString)
 
 		if error != nil || !token.Valid {
-			fmt.Printf("Err 1 %v\n", error)
 			permmisionDenied(w)
 			return
 		}
 		claims := token.Claims.(jwt.MapClaims)
 		s.accNumber = int64(claims["accountNumber"].(float64))
 
-		/*
-			idStr, err := getId(r)
-			if err != nil {
-				fmt.Printf("Err 2 %v\n", err)
-				permmisionDenied(w)
-				return
-			}
-
-			account, err := s.Account.GetAccountByID(idStr)
-			if err != nil {
-				fmt.Printf("Err %v\n", err)
-				permmisionDenied(w)
-				return
-			}
-
-
-			if account.Number != int64(claims["accountNumber"].(float64)) {
-				fmt.Printf("Claims: %v\n", claims)
-				fmt.Printf("Acc Num: %v\n", account.Number)
-				permmisionDenied(w)
-				return
-			}
-		*/
 		handlerFunc(w, r)
 	}
 }
@@ -167,8 +169,17 @@ func validateJWT(tokenString string) (*jwt.Token, error) {
 	})
 }
 
-func getId(r *http.Request) (int, error) {
-	idStr := chi.URLParam(r, "id")
+func getPathIntParam(r *http.Request, key string) (int, error) {
+	idStr := chi.URLParam(r, key)
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		return id, fmt.Errorf("invalid id %s", idStr)
+	}
+	return id, nil
+}
+func getQueryIntParam(r *http.Request, key string) (int, error) {
+	idStr := r.URL.Query().Get(key)
 
 	id, err := strconv.Atoi(idStr)
 	if err != nil {

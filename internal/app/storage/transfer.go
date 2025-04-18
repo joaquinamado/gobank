@@ -2,7 +2,6 @@ package storage
 
 import (
 	"database/sql"
-	"fmt"
 
 	"github.com/joaquinamado/gobank/internal/app/types"
 )
@@ -10,6 +9,7 @@ import (
 type transfer interface {
 	createTransferTable() error
 	CreateTransfer(*types.Transfer) error
+	GetTransfers(*types.PaginationQuery) ([]*types.Transfer, error)
 }
 
 type postgresTransfer struct {
@@ -62,7 +62,6 @@ func (s *postgresTransfer) CreateTransfer(trans *types.Transfer) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("LLEGA 3")
 
 	_, err = tx.Exec(`
 		UPDATE account SET balance = balance + $1 WHERE id = $2
@@ -72,4 +71,53 @@ func (s *postgresTransfer) CreateTransfer(trans *types.Transfer) error {
 	}
 
 	return nil
+}
+
+func (s *postgresTransfer) GetTransfers(query *types.PaginationQuery) ([]*types.Transfer, error) {
+	sqlQuery := `
+		SELECT * FROM transfer 
+		WHERE receiver_id = $1
+		ORDER BY created_at DESC
+		LIMIT $2
+		OFFSET $3
+	`
+	rows, err := s.db.Query(sqlQuery,
+		query.Id,
+		query.Size,
+		query.Page,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	transfers := []*types.Transfer{}
+	for rows.Next() {
+		transfer, err := scanIntoTransfer(rows)
+
+		if err != nil {
+			return nil, err
+		}
+
+		transfers = append(transfers, transfer)
+	}
+
+	return transfers, nil
+
+}
+
+func scanIntoTransfer(rows *sql.Rows) (*types.Transfer, error) {
+	transfer := new(types.Transfer)
+	err := rows.Scan(
+		&transfer.ID,
+		&transfer.ReceiverId,
+		&transfer.SenderId,
+		&transfer.Amount,
+		&transfer.CreatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return transfer, nil
 }

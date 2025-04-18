@@ -44,7 +44,7 @@ func (s *postgresAccount) CreateAccount(acc *types.Account) error {
     )
     values ($1, $2, $3, $4, $5, $6, $7)`
 
-	resp, err := s.db.Query(query,
+	_, err := s.db.Query(query,
 		acc.FirstName,
 		acc.LastName,
 		acc.EncryptedPassword,
@@ -57,7 +57,6 @@ func (s *postgresAccount) CreateAccount(acc *types.Account) error {
 		return err
 	}
 
-	fmt.Printf("%+v\n", resp)
 	return nil
 }
 

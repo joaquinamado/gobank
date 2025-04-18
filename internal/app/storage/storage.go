@@ -28,7 +28,6 @@ func NewPostgresStore() (*Storage, error) {
 	}
 
 	if err := db.Ping(); err != nil {
-		fmt.Printf("Err: %s\n", err)
 		return nil, err
 	}
 

@@ -10,6 +10,7 @@ import (
 
 type transfer interface {
 	CreateTransfer(*types.TransferRequest, int) (*types.Transfer, error)
+	GetTransfers(*types.PaginationQuery) ([]*types.Transfer, error)
 }
 
 type transferRepo struct {
@@ -51,4 +52,13 @@ func (t *transferRepo) CreateTransfer(transferReq *types.TransferRequest, sender
 	}
 
 	return transfer, nil
+}
+
+func (t *transferRepo) GetTransfers(query *types.PaginationQuery) ([]*types.Transfer, error) {
+	// Default vaule for ints
+	if query.Size == 0 {
+		query.Size = 20
+	}
+
+	return t.store.Transfer.GetTransfers(query)
 }
