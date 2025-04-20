@@ -12,6 +12,7 @@ var rep, err = repositories.NewRepository()
 
 func TestNewAccount(t *testing.T) {
 	if err != nil {
+		fmt.Printf("Error creating repository: %+v\n", err)
 		return
 	}
 	account, err := rep.Account.CreateAccount("John", "Doe", "Pass.1234")

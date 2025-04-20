@@ -19,11 +19,10 @@ features:
 - Integrated Swagger in order to make the documentation of the API 
  easier.
 - Added Air to have hot reload
+- Create the transfer logic GET (paginated) & POST
 
 **Pending:**
 
-- Create the transfer logic (POST: DONE, GET: PENDING) 
-- For the transfer GET, create pagination
 - Add an invoice generation endpoint 
 - Create accounts by uploading a CSV (make it as parallel as possible)  
 

@@ -4,11 +4,20 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
+	"os/signal"
+	"runtime"
 
 	. "github.com/joaquinamado/gobank/internal/app/api"
 	"github.com/joaquinamado/gobank/internal/app/env"
 	"github.com/joaquinamado/gobank/internal/app/repositories"
+	"github.com/joaquinamado/gobank/internal/app/services"
 )
+
+func Init() {
+	// Set main function to run on the main thread.
+	runtime.LockOSThread()
+}
 
 //	@title			GoBank API
 //	@version		1.0
@@ -29,6 +38,23 @@ import (
 // @in							header
 // @name						Authorization
 func main() {
+	go startServer()
+
+	// Listen for functions that need to run on the main thread.
+	var quit = make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt)
+	for {
+		select {
+		case f := <-services.Run:
+			f()
+		case <-quit:
+			log.Println("shutting down")
+			return
+		}
+	}
+}
+
+func startServer() {
 	seed := flag.Bool("seed", false, "Seed the database")
 	flag.Parse()
 

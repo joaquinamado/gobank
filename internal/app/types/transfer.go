@@ -14,3 +14,13 @@ type Transfer struct {
 	Amount     int64     `json:"amount"`
 	CreatedAt  time.Time `json:"created_at"`
 }
+
+type TransferInvoice struct {
+	ID               int
+	SenderFullName   string
+	SenderAccount    int
+	ReceiverFullName string
+	ReceiverAccount  int
+	Amount           int64
+	CreatedAt        time.Time
+}

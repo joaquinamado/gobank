@@ -80,6 +80,7 @@ func (s *APIServer) Mount() http.Handler {
 			r.Post("/", s.withJWTAuth(makeHttpHandleFunc(s.handleTransfer)))
 			r.Route("/{id}", func(r chi.Router) {
 				r.Get("/", s.withJWTAuth(s.acceptLoggedUserOnly(makeHttpHandleFunc(s.handleGetTransferById))))
+				r.Get("/invoice", s.withJWTAuth(makeHttpHandleFunc(s.handleGetTransferInvoiceById)))
 			})
 		})
 	})

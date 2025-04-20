@@ -250,6 +250,43 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/transfer/{id}/invoice": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get the invoice for a given transfer",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/pdf"
+                ],
+                "tags": [
+                    "transfer"
+                ],
+                "summary": "Transfer",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Transfer ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "file"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {

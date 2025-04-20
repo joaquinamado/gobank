@@ -206,6 +206,29 @@ paths:
       summary: Transfer
       tags:
       - transfer
+  /transfer/{id}/invoice:
+    get:
+      consumes:
+      - application/json
+      description: Get the invoice for a given transfer
+      parameters:
+      - description: Transfer ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/pdf
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+      security:
+      - BearerAuth: []
+      summary: Transfer
+      tags:
+      - transfer
 securityDefinitions:
   BearerAuth:
     in: header

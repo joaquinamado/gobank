@@ -1,5 +1,7 @@
 github.com/KyleBanks/depth v1.2.1 h1:5h8fQADFrWtarTdtDudMmGsC7GPbOAu6RVB3ffsVFHc=
 github.com/KyleBanks/depth v1.2.1/go.mod h1:jzSb9d0L43HxTQfT+oSA1EEp2q+ne2uh6XgeJcm8brE=
+github.com/adrg/go-wkhtmltopdf v0.3.0 h1:Zy/bbS6fPlAzuogW5uKa/sLX+SNWwV2DvVued0ZD55c=
+github.com/adrg/go-wkhtmltopdf v0.3.0/go.mod h1:PabO59E2w5GMKC8apqcXmf5rZZmiydIP3H1Wb4Uox6I=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/gabriel-vasile/mimetype v1.4.8 h1:FfZ3gj38NjllZIeJAmMhr+qKL8Wu+nOoI3GqacKw1NM=
