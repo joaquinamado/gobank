@@ -26,5 +26,5 @@ features:
 - [ ] WebSocket for account balance? Real time ?
 - [ ] Message queue for transfer (like notifications) ? 
 - [ ] Frontend (HTMX?)
-- [ ] Improve auth, reset token, roles?, close sesion from one device?
+- [ ] Improve auth, reset token, forgot pass (add emails?), roles?, close device sesion remotely?
 
